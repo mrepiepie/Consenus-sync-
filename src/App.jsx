@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ActivityDecider from './components/ActivityDecider';
 import BillSplitter from './components/BillSplitter';
-import { Layers, Wallet, Sparkles } from 'lucide-react';
+import { Layers, Wallet } from 'lucide-react';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dining');
@@ -18,7 +18,7 @@ function App() {
     let height = (canvas.height = window.innerHeight);
 
     const particles = [];
-    const particleCount = 70;
+    const particleCount = 75;
     const maxDistance = 120;
     const mouse = { x: null, y: null, radius: 150 };
 
@@ -33,15 +33,12 @@ function App() {
       }
 
       update() {
-        // Move particle
         this.x += this.vx;
         this.y += this.vy;
 
-        // Bounce on boundary limits
         if (this.x < 0 || this.x > width) this.vx *= -1;
         if (this.y < 0 || this.y > height) this.vy *= -1;
 
-        // Push away from mouse cursor interactively
         if (mouse.x !== null && mouse.y !== null) {
           const dx = this.x - mouse.x;
           const dy = this.y - mouse.y;
@@ -66,12 +63,10 @@ function App() {
       }
     }
 
-    // Initialize particles
     for (let i = 0; i < particleCount; i++) {
       particles.push(new Particle());
     }
 
-    // Event listeners
     const handleMouseMove = (e) => {
       mouse.x = e.clientX;
       mouse.y = e.clientY;
@@ -94,13 +89,11 @@ function App() {
     const animate = () => {
       ctx.clearRect(0, 0, width, height);
 
-      // Draw and update particles
       particles.forEach(p => {
         p.update();
         p.draw();
       });
 
-      // Draw interactive connections
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
@@ -111,7 +104,6 @@ function App() {
             ctx.beginPath();
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
-            // Dynamic opacity based on proximity distance
             const alpha = (1 - dist / maxDistance) * 0.15;
             ctx.strokeStyle = `rgba(129, 140, 248, ${alpha})`;
             ctx.lineWidth = 1;
@@ -142,23 +134,26 @@ function App() {
         className="absolute inset-0 z-0 pointer-events-none"
       />
 
-      {/* Top Border Gradient Shadow Accent */}
+      {/* Top Border Accent */}
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 z-50" />
 
       {/* Navigation Header */}
       <header className="relative z-50 border-b border-gray-900 bg-black/90 backdrop-blur-lg sticky top-0">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
           
-          {/* Brand Logo & Animated Icon */}
+          {/* Aesthetic BIA loyalty inspired Brand Logo & Typography */}
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 bg-zinc-950 border border-zinc-800 rounded-xl flex items-center justify-center shadow-lg shadow-black transition-transform duration-300">
-              <Sparkles className="h-5.5 w-5.5 text-indigo-400 logo-rotate" />
+            {/* Custom 4-Diamond Logo (BIA Loyalty Inspired Style) */}
+            <div className="grid grid-cols-2 gap-1 w-7 h-7 logo-rotate relative">
+              <div className="w-3 h-3 bg-indigo-500 rounded-[3px] rotate-45 transform origin-center shadow-[0_0_12px_rgba(99,102,241,0.6)]" />
+              <div className="w-3 h-3 bg-[#0d9488] rounded-[3px] rotate-45 transform origin-center shadow-[0_0_12px_rgba(13,148,136,0.6)]" />
+              <div className="w-3 h-3 bg-[#ea580c] rounded-[3px] rotate-45 transform origin-center shadow-[0_0_12px_rgba(234,88,12,0.6)]" />
+              <div className="w-3 h-3 bg-violet-500 rounded-[3px] rotate-45 transform origin-center shadow-[0_0_12px_rgba(167,139,250,0.6)]" />
             </div>
-            <div>
-              <span className="font-extrabold text-xl tracking-tight text-white block">ConsensuSync</span>
-              <span className="text-[10px] block text-gray-500 font-mono tracking-widest uppercase -mt-1 font-bold">
-                Consensus Engine
-              </span>
+            
+            <div className="flex items-baseline gap-1.5 ml-1">
+              <span className="font-extrabold text-2xl tracking-tight text-white font-sans">ConsensuSync</span>
+              <span className="text-gray-400 text-xs font-normal lowercase tracking-wide font-sans">loyalty</span>
             </div>
           </div>
 
@@ -169,7 +164,7 @@ function App() {
               className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-300 cursor-pointer ${
                 activeTab === 'dining'
                   ? 'bg-zinc-900 text-white shadow border border-zinc-800 scale-[1.02]'
-                  : 'text-gray-500 hover:text-gray-300'
+                  : 'text-gray-550 hover:text-gray-300'
               }`}
             >
               <Layers className="h-4 w-4" /> Dinner Decider
@@ -179,7 +174,7 @@ function App() {
               className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-300 cursor-pointer ${
                 activeTab === 'bills'
                   ? 'bg-zinc-900 text-white shadow border border-zinc-800 scale-[1.02]'
-                  : 'text-gray-500 hover:text-gray-300'
+                  : 'text-gray-550 hover:text-gray-300'
               }`}
             >
               <Wallet className="h-4 w-4" /> Expense Splitter
