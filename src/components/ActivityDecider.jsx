@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { calculateSchulze } from '../utils/algorithms';
+import { calculateResentmentMinimizer } from '../utils/algorithms';
 import { 
   Users, Plus, Trash2, ShieldAlert, Award, 
-  Layers, RotateCcw, Scale
+  Layers, RotateCcw
 } from 'lucide-react';
 import gsap from 'gsap';
 
 const DEFAULT_PARTICIPANTS = [
-  { id: 'p1', name: 'Alex', veto: 'Sushi Palace', weight: 1, preferences: ['Burger Joint', 'Taco Express', 'Sushi Palace', 'Pasta House'] },
-  { id: 'p2', name: 'Blake', veto: '', weight: 1.5, preferences: ['Sushi Palace', 'Pasta House', 'Burger Joint', 'Taco Express'] },
-  { id: 'p3', name: 'Charlie', veto: 'Burger Joint', weight: 1, preferences: ['Pasta House', 'Taco Express', 'Sushi Palace', 'Burger Joint'] },
-  { id: 'p4', name: 'Dana', veto: '', weight: 1, preferences: ['Taco Express', 'Sushi Palace', 'Pasta House', 'Burger Joint'] }
+  { id: 'p1', name: 'Alex', veto: 'Sushi Palace', preferences: ['Burger Joint', 'Taco Express', 'Sushi Palace', 'Pasta House'] },
+  { id: 'p2', name: 'Blake', veto: '', preferences: ['Sushi Palace', 'Pasta House', 'Burger Joint', 'Taco Express'] },
+  { id: 'p3', name: 'Charlie', veto: 'Burger Joint', preferences: ['Pasta House', 'Taco Express', 'Sushi Palace', 'Burger Joint'] },
+  { id: 'p4', name: 'Dana', veto: '', preferences: ['Taco Express', 'Sushi Palace', 'Pasta House', 'Burger Joint'] }
 ];
 
 const DEFAULT_OPTIONS = [
@@ -37,7 +37,6 @@ export default function ActivityDecider() {
   const [editingParticipantId, setEditingParticipantId] = useState(null);
   const [editName, setEditName] = useState('');
   const [editVeto, setEditVeto] = useState('');
-  const [editWeight, setEditWeight] = useState(1);
   const [editPrefs, setEditPrefs] = useState([]);
 
   const resultsCardRef = useRef(null);
@@ -52,31 +51,19 @@ export default function ActivityDecider() {
   }, [options]);
 
   const getResults = () => {
-    const activeVetoes = new Set();
+    const activeVetoes = [];
     participants.forEach(p => {
       if (p.veto) {
-        activeVetoes.add(p.veto);
+        activeVetoes.push(p.veto);
       }
     });
 
-    const validCandidates = options.filter(opt => !activeVetoes.has(opt));
-
-    if (validCandidates.length === 0) {
-      return { winner: null, ranked: [], pairwise: null, paths: null, vetoes: Array.from(activeVetoes) };
-    }
-
     const ballots = [];
-    const weights = [];
     participants.forEach(p => {
-      ballots.push(p.preferences.filter(pref => validCandidates.includes(pref)));
-      weights.push(p.weight || 1);
+      ballots.push(p.preferences);
     });
 
-    const schulzeResult = calculateSchulze(validCandidates, ballots, weights);
-    return {
-      ...schulzeResult,
-      vetoes: Array.from(activeVetoes)
-    };
+    return calculateResentmentMinimizer(options, ballots, activeVetoes);
   };
 
   const results = getResults();
@@ -120,7 +107,6 @@ export default function ActivityDecider() {
         id: newId,
         name: trimmed,
         veto: '',
-        weight: 1,
         preferences: [...options]
       }]);
       setNewParticipantName('');
@@ -138,7 +124,6 @@ export default function ActivityDecider() {
     setEditingParticipantId(p.id);
     setEditName(p.name);
     setEditVeto(p.veto);
-    setEditWeight(p.weight || 1);
     // Make sure we have all current options mapped
     const missing = options.filter(o => !p.preferences.includes(o));
     setEditPrefs([...p.preferences, ...missing].filter(o => options.includes(o)));
@@ -151,7 +136,6 @@ export default function ActivityDecider() {
           ...p,
           name: editName,
           veto: editVeto,
-          weight: Number(editWeight) || 1,
           preferences: editPrefs
         };
       }
@@ -198,7 +182,7 @@ export default function ActivityDecider() {
           </button>
         </div>
         <p className="text-gray-400 text-sm max-w-3xl leading-relaxed mt-4">
-          Struggling with the classic "Where should we go to eat?" dilemma. Collect ranked preferences and absolute vetos from members, filters out vetoed options to prevent frustration, then uses the **Schulze Beatpath Algorithm** to find the option that mathematically dominates the rest.
+          Struggling with the classic "Where should we go to eat?" dilemma. Collect ranked preferences and absolute vetos from members, filters out vetoed options to prevent frustration, then uses a **Resentment Minimizing Utility Algorithm** to find the consensus choice that maximizes group happiness and minimizes friction.
         </p>
       </div>
 
@@ -277,11 +261,8 @@ export default function ActivityDecider() {
                 >
                   <div>
                     <div className="font-semibold text-gray-205">{p.name}</div>
-                    <div className="text-xs text-gray-550 mt-0.5 flex items-center gap-2">
-                      <span>{p.veto ? `Veto: ${p.veto}` : 'No veto'}</span>
-                      <span className="text-[10px] text-indigo-400 bg-indigo-950/40 px-1.5 py-0.5 rounded border border-indigo-900/30">
-                        Weight: {p.weight || 1}x
-                      </span>
+                    <div className="text-xs text-gray-550 mt-0.5">
+                      {p.veto ? `Veto: ${p.veto}` : 'No veto'}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -321,7 +302,7 @@ export default function ActivityDecider() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
                     Veto / Absolute No-Go
@@ -339,24 +320,6 @@ export default function ActivityDecider() {
                   <p className="text-xs text-gray-550 mt-2.5 flex items-center gap-1.5 leading-relaxed">
                     <ShieldAlert className="h-4 w-4 text-amber-500 flex-shrink-0" />
                     Selecting a veto automatically excludes that venue from the ballot.
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-400 tracking-wider mb-2 uppercase flex items-center gap-1">
-                    <Scale className="h-3.5 w-3.5 text-indigo-400" /> Vote Weight Factor
-                  </label>
-                  <select 
-                    value={editWeight} 
-                    onChange={(e) => setEditWeight(e.target.value)}
-                    className="w-full bg-slate-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-white"
-                  >
-                    <option value="1">Standard Weight (1.0x)</option>
-                    <option value="1.5">Driver / Organizer (1.5x)</option>
-                    <option value="2">Birthday Person (2.0x)</option>
-                  </select>
-                  <p className="text-xs text-gray-550 mt-2.5 leading-relaxed">
-                    Grants higher priority calculations to specific members in case of a split tie.
                   </p>
                 </div>
 
@@ -417,7 +380,7 @@ export default function ActivityDecider() {
 
                 <div className="space-y-3">
                   <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                    Pairwise Win Breakdown (Schulze Scores)
+                    Group Utility Rankings (Total Utility / Polarisation Variance)
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {results.ranked.map((r, i) => (
@@ -426,9 +389,14 @@ export default function ActivityDecider() {
                           <span className="text-xs text-gray-550">#{i + 1}</span>
                           {r.name}
                         </span>
-                        <span className="text-xs px-2.5 py-1 bg-emerald-950/40 text-emerald-400 rounded-full border border-emerald-800/30 font-bold">
-                          {r.score} wins
-                        </span>
+                        <div className="text-right">
+                          <span className="text-xs px-2.5 py-1 bg-emerald-950/40 text-emerald-400 rounded-full border border-emerald-800/30 font-bold mr-2">
+                            {r.score} pts
+                          </span>
+                          <span className="text-[10px] px-2 py-0.5 bg-slate-950 text-gray-500 rounded border border-gray-850 font-mono">
+                            Var: {r.variance}
+                          </span>
+                        </div>
                       </div>
                     ))}
                   </div>

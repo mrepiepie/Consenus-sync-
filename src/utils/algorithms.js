@@ -3,89 +3,63 @@
  */
 
 /**
- * 1. Schulze Method (Beatpath Ranked-Choice Voting) with voter weight support
- * Used to find the Condorcet winner by calculating strongest path relations.
+ * 1. Borda Utility & Resentment Minimizer Algorithm
+ * Calculates group utility score based on ranked choices while honoring absolute vetoes.
+ * Uses rank variance as a tie-breaker to select the option that minimizes group division.
+ * 
+ * @param {Array<string>} candidates - List of available options (e.g. Restaurants).
+ * @param {Array<Array<string>>} ballots - List of ranked preferences from each participant.
+ * @param {Array<string>} vetoes - List of all active vetoed candidates across participants.
+ * @returns {Object} { winner, ranked: [{ name, score, variance }], vetoes }
  */
-export function calculateSchulze(candidates, ballots, weights = []) {
+export function calculateResentmentMinimizer(candidates, ballots, vetoes = []) {
+  const activeVetoes = new Set(vetoes);
+  
+  // Filter out any option that has been vetoed by any participant
+  const validCandidates = candidates.filter(cand => !activeVetoes.has(cand));
+
+  if (validCandidates.length === 0) {
+    return { winner: null, ranked: [], vetoes: Array.from(activeVetoes) };
+  }
+
   const numCandidates = candidates.length;
-  const d = Array.from({ length: numCandidates }, () => Array(numCandidates).fill(0));
+  // Borda Point scale: 1st choice gets (N-1) points, last gets 0 points.
+  const getBordaPoints = (candidate, ballot) => {
+    const rankIndex = ballot.indexOf(candidate);
+    if (rankIndex === -1) return 0; // Not ranked
+    return numCandidates - 1 - rankIndex;
+  };
 
-  ballots.forEach((ballot, idx) => {
-    // Default weight is 1.0 if not specified
-    const voterWeight = Number(weights[idx]) || 1.0;
+  const results = validCandidates.map(cand => {
+    // Collect points assigned to this candidate by each voter
+    const scores = ballots.map(ballot => getBordaPoints(cand, ballot));
+    
+    // Sum of points = Group Utility
+    const totalUtility = scores.reduce((sum, val) => sum + val, 0);
 
-    for (let i = 0; i < numCandidates; i++) {
-      for (let j = 0; j < numCandidates; j++) {
-        if (i === j) continue;
-        const candI = candidates[i];
-        const candJ = candidates[j];
-        
-        const rankI = ballot.indexOf(candI);
-        const rankJ = ballot.indexOf(candJ);
+    // Calculate Variance (to measure how polarized the group is on this option)
+    const mean = totalUtility / scores.length;
+    const variance = scores.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / scores.length;
 
-        const hasI = rankI !== -1;
-        const hasJ = rankJ !== -1;
-
-        if (hasI && hasJ) {
-          if (rankI < rankJ) {
-            d[i][j] += voterWeight;
-          }
-        } else if (hasI && !hasJ) {
-          d[i][j] += voterWeight;
-        }
-      }
-    }
+    return {
+      name: cand,
+      score: totalUtility,
+      variance: Number(variance.toFixed(2))
+    };
   });
 
-  const p = Array.from({ length: numCandidates }, () => Array(numCandidates).fill(0));
-
-  for (let i = 0; i < numCandidates; i++) {
-    for (let j = 0; j < numCandidates; j++) {
-      if (i !== j) {
-        if (d[i][j] > d[j][i]) {
-          p[i][j] = d[i][j];
-        } else {
-          p[i][j] = 0;
-        }
-      }
+  // Sort: 1st by highest total utility score, 2nd by lowest variance (less division / lower resentment)
+  results.sort((a, b) => {
+    if (b.score !== a.score) {
+      return b.score - a.score;
     }
-  }
-
-  // Floyd-Warshall transitive closure path strength search
-  for (let i = 0; i < numCandidates; i++) {
-    for (let j = 0; j < numCandidates; j++) {
-      if (i !== j) {
-        for (let k = 0; k < numCandidates; k++) {
-          if (i !== k && j !== k) {
-            p[j][k] = Math.max(p[j][k], Math.min(p[j][i], p[i][k]));
-          }
-        }
-      }
-    }
-  }
-
-  const winCount = Array(numCandidates).fill(0);
-  for (let i = 0; i < numCandidates; i++) {
-    for (let j = 0; j < numCandidates; j++) {
-      if (i !== j) {
-        if (p[i][j] > p[j][i]) {
-          winCount[i]++;
-        }
-      }
-    }
-  }
-
-  const ranked = candidates.map((cand, idx) => ({
-    name: cand,
-    score: Number(winCount[idx].toFixed(2)),
-    wins: Number(winCount[idx].toFixed(2)),
-  })).sort((a, b) => b.score - a.score);
+    return a.variance - b.variance;
+  });
 
   return {
-    winner: ranked[0] ? ranked[0].name : null,
-    ranked,
-    pairwise: d,
-    paths: p
+    winner: results[0] ? results[0].name : null,
+    ranked: results,
+    vetoes: Array.from(activeVetoes)
   };
 }
 
