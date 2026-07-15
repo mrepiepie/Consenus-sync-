@@ -56,7 +56,7 @@ function App() {
       id: name,
       name,
       veto: name === 'Alex' ? 'Sushi Palace' : name === 'Charlie' ? 'Burger Joint' : '',
-      preferences: [...DEFAULT_OPTIONS]
+      preferences: [] // Initialize empty, forces users to configure explicit preferences
     }));
   });
 
@@ -115,7 +115,7 @@ function App() {
             id: name,
             name,
             veto: '',
-            preferences: [...options]
+            preferences: [] // Newly added members start with empty ballots, forcing a manual vote
           });
         }
       });
@@ -133,21 +133,13 @@ function App() {
     }
   }, [members]);
 
-  // Handle options changes. To prevent infinite loop/save bugs, we only run updates
-  // if options are actually added or removed.
+  // Ensure preference arrays don't reference deleted options
   useEffect(() => {
     setParticipants(prev => {
       let isDifferent = false;
       const updated = prev.map(p => {
-        let filtered = p.preferences.filter(o => options.includes(o));
-        let added = false;
-        options.forEach(o => {
-          if (!filtered.includes(o)) {
-            filtered.push(o);
-            added = true;
-          }
-        });
-        if (filtered.length !== p.preferences.length || added) {
+        const filtered = p.preferences.filter(o => options.includes(o));
+        if (filtered.length !== p.preferences.length) {
           isDifferent = true;
         }
         return { ...p, preferences: filtered };
@@ -332,8 +324,8 @@ function App() {
   const startEditParticipant = (p) => {
     setEditingParticipantId(p.id);
     setEditVeto(p.veto);
-    const missing = options.filter(o => !p.preferences.includes(o));
-    setEditPrefs([...p.preferences, ...missing].filter(o => options.includes(o)));
+    // Let user configure preferences dynamically from all currently available options
+    setEditPrefs([...p.preferences, ...options.filter(o => !p.preferences.includes(o))].filter(o => options.includes(o)));
   };
 
   const saveParticipantEdit = () => {
@@ -387,6 +379,12 @@ function App() {
     setMembers(DEFAULT_MEMBERS);
     setOptions(DEFAULT_OPTIONS);
     setExpenses(DEFAULT_EXPENSES);
+    setParticipants(DEFAULT_MEMBERS.map(name => ({
+      id: name,
+      name,
+      veto: name === 'Alex' ? 'Sushi Palace' : name === 'Charlie' ? 'Burger Joint' : '',
+      preferences: [...DEFAULT_OPTIONS]
+    })));
     setEditingParticipantId(null);
   };
 
@@ -398,7 +396,6 @@ function App() {
     const el = document.getElementById(targetId);
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // GSAP Highlight effect
       gsap.fromTo(el, 
         { outline: '2px solid rgba(99, 102, 241, 0)' },
         { outline: '2px solid rgba(99, 102, 241, 1)', duration: 0.4, yoyo: true, repeat: 3 }
