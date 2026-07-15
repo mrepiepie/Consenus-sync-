@@ -38,8 +38,11 @@ export function calculateResentmentMinimizer(candidates, ballots, vetoes = []) {
     const totalUtility = scores.reduce((sum, val) => sum + val, 0);
 
     // Calculate Variance (to measure how polarized the group is on this option)
-    const mean = totalUtility / scores.length;
-    const variance = scores.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / scores.length;
+    let variance = 0;
+    if (scores.length > 0) {
+      const mean = totalUtility / scores.length;
+      variance = scores.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / scores.length;
+    }
 
     return {
       name: cand,

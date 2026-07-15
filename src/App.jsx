@@ -334,8 +334,8 @@ function App() {
   return (
     <div className="min-h-screen text-gray-150 flex flex-col relative overflow-hidden bg-black font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
       
-      {/* Dynamic Background Canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" />
+      {/* Background Interactive canvas with absolute low z-index */}
+      <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" style={{ pointerEvents: 'none' }} />
 
       {/* Top Neon Border Gradient */}
       <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 z-50 shadow-[0_3px_20px_rgba(99,102,241,0.5)]" />
@@ -344,7 +344,7 @@ function App() {
       <header className="relative z-50 border-b border-zinc-900 bg-black/85 backdrop-blur-xl sticky top-0 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3.5">
-            {/* 4-Diamond Logo with enhanced neon glow shadows */}
+            {/* 4-Diamond Logo */}
             <div className="grid grid-cols-2 gap-1 w-7.5 h-7.5 logo-rotate relative">
               <div className="w-3.5 h-3.5 bg-indigo-500 rounded-[4px] rotate-45 transform origin-center shadow-[0_0_14px_rgba(99,102,241,0.75)]" />
               <div className="w-3.5 h-3.5 bg-teal-500 rounded-[4px] rotate-45 transform origin-center shadow-[0_0_14px_rgba(20,184,166,0.75)]" />
@@ -370,7 +370,7 @@ function App() {
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-6 lg:px-8 py-10 space-y-8">
         
         {/* Intro Premium Hero Explainer Box */}
-        <div className="floating-card border border-zinc-900 bg-gradient-to-br from-zinc-950 to-black p-8 rounded-2xl relative overflow-hidden shadow-2xl">
+        <div className="border border-zinc-900 bg-gradient-to-br from-zinc-950 to-black p-8 rounded-2xl relative overflow-hidden shadow-2xl">
           <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/5 rounded-full blur-[80px] pointer-events-none" />
           <div className="flex items-center gap-2 mb-2">
             <span className="px-2.5 py-0.5 bg-indigo-950/50 text-indigo-400 border border-indigo-900/30 rounded-full text-[10px] font-bold uppercase tracking-wider">
@@ -387,7 +387,7 @@ function App() {
         </div>
 
         {/* SECTION 1: Shared Group Members Panel */}
-        <div className="floating-card border border-zinc-900 bg-zinc-950/40 p-6 rounded-2xl relative">
+        <div className="border border-zinc-900 bg-zinc-950/40 p-6 rounded-2xl relative">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-indigo-400" />
@@ -447,7 +447,7 @@ function App() {
           
           {/* SECTION 2: DINNER DECIDER */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="floating-card border border-zinc-900 bg-zinc-950/40 p-6 rounded-2xl space-y-6">
+            <div className="border border-zinc-900 bg-zinc-950/40 p-6 rounded-2xl space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Layers className="h-5 w-5 text-indigo-400" />
@@ -501,7 +501,7 @@ function App() {
                       onClick={() => startEditParticipant(p)}
                       className={`flex justify-between items-center p-3 rounded-xl border text-xs cursor-pointer transition-all duration-200 ${
                         editingParticipantId === p.id 
-                        ? 'bg-indigo-950/20 border-indigo-500/80 shadow-md shadow-indigo-500/5' 
+                        ? 'bg-indigo-955/20 border-indigo-500/80 shadow-md shadow-indigo-500/5' 
                         : 'bg-zinc-900/40 border-zinc-850 hover:border-indigo-500/40'
                       }`}
                     >
@@ -600,7 +600,7 @@ function App() {
 
           {/* SECTION 3: EXPENSE SPLITTER */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="floating-card border border-zinc-900 bg-zinc-950/40 p-6 rounded-2xl space-y-6">
+            <div className="border border-zinc-900 bg-zinc-950/40 p-6 rounded-2xl space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Wallet className="h-5 w-5 text-indigo-400" />
