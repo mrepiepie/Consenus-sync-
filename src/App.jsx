@@ -395,9 +395,17 @@ function App() {
                 1. Group Directory
               </h3>
             </div>
-            <span className="text-[10px] text-gray-500 font-mono">
-              Active: {members.length} members
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-[10px] text-gray-400 font-mono bg-zinc-900/60 border border-zinc-800/80 px-2.5 py-1 rounded-lg">
+                Active: {members.length} {members.length === 1 ? 'member' : 'members'}
+              </span>
+              <button 
+                onClick={() => setMembers([])}
+                className="bg-red-950/40 border border-red-900/30 hover:border-red-500/50 hover:bg-red-950/60 text-red-400 px-3 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
+              >
+                Clear All
+              </button>
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 mb-6 max-w-md">
