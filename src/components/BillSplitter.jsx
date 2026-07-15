@@ -116,7 +116,7 @@ export default function BillSplitter() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Intro Header Section */}
-      <div className="border border-gray-800 bg-slate-900/40 p-8 rounded-2xl backdrop-blur-md relative overflow-hidden">
+      <div className="floating-card border border-gray-800 bg-slate-900/40 p-8 rounded-2xl backdrop-blur-md relative overflow-hidden">
         <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -127,7 +127,7 @@ export default function BillSplitter() {
           </div>
           <button 
             onClick={resetToDefault}
-            className="flex items-center gap-2 bg-slate-950 border border-gray-800 hover:border-gray-700 text-gray-300 px-4 py-2 rounded-xl text-xs font-semibold transition"
+            className="flex items-center gap-2 bg-slate-950 border border-gray-800 hover:border-gray-700 text-gray-300 px-4 py-2 rounded-xl text-xs font-semibold transition cursor-pointer"
           >
             <RotateCcw className="h-3.5 w-3.5" /> Reset Demo Values
           </button>
@@ -141,7 +141,7 @@ export default function BillSplitter() {
         {/* Config / Inputs */}
         <div className="lg:col-span-1 space-y-6">
           {/* Members list */}
-          <div className="border border-gray-850 bg-slate-900/30 backdrop-blur-md p-6 rounded-2xl">
+          <div className="floating-card border border-gray-850 bg-slate-900/30 backdrop-blur-md p-6 rounded-2xl">
             <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-400 mb-4">
               Group Members
             </h3>
@@ -155,7 +155,7 @@ export default function BillSplitter() {
               />
               <button 
                 onClick={addMember}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer"
               >
                 Add
               </button>
@@ -164,7 +164,7 @@ export default function BillSplitter() {
               {members.map(m => (
                 <div key={m} className="flex items-center gap-1.5 bg-slate-955/60 border border-gray-850 px-3 py-1.5 rounded-xl text-xs">
                   <span className="text-gray-250 font-medium">{m}</span>
-                  <button onClick={() => removeMember(m)} className="text-gray-500 hover:text-red-400 ml-1 transition">
+                  <button onClick={() => removeMember(m)} className="text-gray-500 hover:text-red-400 ml-1 transition cursor-pointer">
                     &times;
                   </button>
                 </div>
@@ -173,7 +173,7 @@ export default function BillSplitter() {
           </div>
 
           {/* Add Expense Form */}
-          <div className="border border-gray-850 bg-slate-900/30 backdrop-blur-md p-6 rounded-2xl">
+          <div className="floating-card border border-gray-850 bg-slate-900/30 backdrop-blur-md p-6 rounded-2xl">
             <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-400 mb-4">
               Add Expense
             </h3>
@@ -233,7 +233,7 @@ export default function BillSplitter() {
 
               <button 
                 onClick={addExpense}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl text-sm font-semibold transition"
+                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-xl text-sm font-semibold transition cursor-pointer"
               >
                 Add Expense
               </button>
@@ -244,16 +244,16 @@ export default function BillSplitter() {
         {/* Expenses List & Debt Settlements */}
         <div className="lg:col-span-2 space-y-6">
           {/* Raw list of expenses */}
-          <div className="border border-gray-850 bg-slate-900/30 backdrop-blur-md p-6 rounded-2xl">
+          <div className="floating-card border border-gray-850 bg-slate-900/30 backdrop-blur-md p-6 rounded-2xl">
             <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-400 mb-4">
               Expenses List
             </h3>
             <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
               {expenses.map(exp => (
-                <div key={exp.id} className="flex justify-between items-center bg-slate-950/60 p-4 rounded-xl border border-gray-855 text-sm">
+                <div key={exp.id} className="flex justify-between items-center bg-slate-955/60 p-4 rounded-xl border border-gray-855 text-sm animate-fade-in">
                   <div>
                     <div className="font-semibold text-gray-205">{exp.description}</div>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-gray-550 mt-1">
                       Paid by <span className="text-indigo-400 font-medium">{exp.paidBy}</span> &middot; Split among {exp.splitAmong.join(', ')}
                     </div>
                   </div>
@@ -261,7 +261,7 @@ export default function BillSplitter() {
                     <span className="font-bold text-white">${exp.amount}</span>
                     <button 
                       onClick={() => removeExpense(exp.id)}
-                      className="text-gray-500 hover:text-red-400 p-1 transition"
+                      className="text-gray-500 hover:text-red-400 p-1 transition cursor-pointer"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -269,13 +269,13 @@ export default function BillSplitter() {
                 </div>
               ))}
               {expenses.length === 0 && (
-                <div className="text-center py-6 text-xs text-gray-500">No expenses added yet.</div>
+                <div className="text-center py-6 text-xs text-gray-550">No expenses added yet.</div>
               )}
             </div>
           </div>
 
           {/* Settled Transactions Output */}
-          <div className="border border-gray-850 bg-slate-900/30 backdrop-blur-md p-6 rounded-2xl">
+          <div className="floating-card border border-gray-850 bg-slate-900/30 backdrop-blur-md p-6 rounded-2xl">
             <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-400 mb-6 flex items-center gap-2">
               Simplified Settlements
             </h3>
@@ -285,7 +285,7 @@ export default function BillSplitter() {
                 {settlements.map((settle, idx) => (
                   <div 
                     key={idx} 
-                    className="settlement-item flex items-center justify-between p-4 rounded-xl border border-indigo-500/10 bg-indigo-650/5 hover:border-indigo-500/20 transition-all"
+                    className="settlement-item flex items-center justify-between p-4 rounded-xl border border-indigo-500/10 bg-indigo-650/5 hover:border-indigo-500/20 transition-all duration-300"
                   >
                     <div className="flex items-center gap-3 text-sm">
                       <span className="font-bold text-red-400">{settle.from}</span>

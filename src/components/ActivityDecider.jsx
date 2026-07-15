@@ -163,7 +163,7 @@ export default function ActivityDecider() {
   return (
     <div className="space-y-8">
       {/* Intro Header Section */}
-      <div className="border border-gray-800 bg-slate-900/40 p-8 rounded-2xl backdrop-blur-md relative overflow-hidden">
+      <div className="floating-card border border-gray-800 bg-slate-900/40 p-8 rounded-2xl backdrop-blur-md relative overflow-hidden">
         <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-xl pointer-events-none" />
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -190,7 +190,7 @@ export default function ActivityDecider() {
         {/* Left Hand Options and Members panel */}
         <div className="lg:col-span-1 space-y-6">
           {/* Choices Management */}
-          <div className="border border-gray-850 bg-slate-900/30 backdrop-blur-md p-6 rounded-2xl">
+          <div className="floating-card border border-gray-855 bg-slate-900/30 backdrop-blur-md p-6 rounded-2xl">
             <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-400 mb-4 flex items-center gap-2">
               Choices / Places
             </h3>
@@ -205,7 +205,7 @@ export default function ActivityDecider() {
               />
               <button 
                 onClick={addOption}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer"
               >
                 Add
               </button>
@@ -217,7 +217,7 @@ export default function ActivityDecider() {
                   <span className="font-medium text-gray-205">{opt}</span>
                   <button 
                     onClick={() => removeOption(opt)}
-                    className="text-gray-500 hover:text-red-400 p-1 transition"
+                    className="text-gray-500 hover:text-red-400 p-1 transition cursor-pointer"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -227,7 +227,7 @@ export default function ActivityDecider() {
           </div>
 
           {/* Participant Management */}
-          <div className="border border-gray-850 bg-slate-900/30 backdrop-blur-md p-6 rounded-2xl">
+          <div className="floating-card border border-gray-855 bg-slate-900/30 backdrop-blur-md p-6 rounded-2xl">
             <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-400 mb-4 flex items-center gap-2">
               Group Members
             </h3>
@@ -242,7 +242,7 @@ export default function ActivityDecider() {
               />
               <button 
                 onClick={addParticipant}
-                className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition"
+                className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer"
               >
                 Join
               </button>
@@ -255,7 +255,7 @@ export default function ActivityDecider() {
                   onClick={() => startEditParticipant(p)}
                   className={`flex justify-between items-center p-3.5 rounded-xl border text-sm cursor-pointer transition ${
                     editingParticipantId === p.id 
-                    ? 'bg-indigo-950/20 border-indigo-500/80 shadow-md shadow-indigo-500/5' 
+                    ? 'bg-indigo-955/20 border-indigo-500/80 shadow-md shadow-indigo-500/5' 
                     : 'bg-slate-955/60 border-gray-850 hover:border-indigo-500/30'
                   }`}
                 >
@@ -289,14 +289,14 @@ export default function ActivityDecider() {
         <div className="lg:col-span-2 space-y-6">
           {/* Member Preferences Editor */}
           {editingParticipantId && (
-            <div className="border border-indigo-500/20 bg-indigo-955/5 backdrop-blur-md p-6 rounded-2xl animate-fade-in">
+            <div className="floating-card border border-indigo-500/20 bg-indigo-955/5 backdrop-blur-md p-6 rounded-2xl animate-fade-in">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-bold text-white">
                   Preferences Editor: {editName}
                 </h3>
                 <button 
                   onClick={saveParticipantEdit}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-lg shadow-indigo-500/10"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-lg shadow-indigo-500/10 cursor-pointer"
                 >
                   Save & Apply Preferences
                 </button>
@@ -340,14 +340,14 @@ export default function ActivityDecider() {
                           <button 
                             disabled={idx === 0} 
                             onClick={() => movePref(idx, -1)}
-                            className="bg-gray-850 hover:bg-gray-800 disabled:opacity-30 text-white px-2 py-1.5 rounded-lg text-[10px]"
+                            className="bg-gray-850 hover:bg-gray-800 disabled:opacity-30 text-white px-2 py-1.5 rounded-lg text-[10px] cursor-pointer"
                           >
                             ▲
                           </button>
                           <button 
                             disabled={idx === editPrefs.length - 1} 
                             onClick={() => movePref(idx, 1)}
-                            className="bg-gray-850 hover:bg-gray-800 disabled:opacity-30 text-white px-2 py-1.5 rounded-lg text-[10px]"
+                            className="bg-gray-850 hover:bg-gray-800 disabled:opacity-30 text-white px-2 py-1.5 rounded-lg text-[10px] cursor-pointer"
                           >
                             ▼
                           </button>
@@ -361,7 +361,7 @@ export default function ActivityDecider() {
           )}
 
           {/* Results Display */}
-          <div ref={resultsCardRef} className="border border-gray-850 bg-slate-900/30 backdrop-blur-md p-6 rounded-2xl">
+          <div ref={resultsCardRef} className="floating-card border border-gray-850 bg-slate-900/30 backdrop-blur-md p-6 rounded-2xl">
             <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-400 mb-6 flex items-center gap-2">
               Consensus Result
             </h3>

@@ -7,36 +7,44 @@ function App() {
   const [activeTab, setActiveTab] = useState('dining');
 
   return (
-    <div className="min-h-screen text-gray-100 flex flex-col relative overflow-hidden bg-[#070a13]">
-      {/* Background blobs matched to SapioMatch template design */}
+    <div className="min-h-screen text-gray-100 flex flex-col relative overflow-hidden bg-[#070a13] font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
+      
+      {/* Dynamic Animated Floating Background Blobs */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
-        <div className="absolute top-[-20%] left-[50%] w-[1000px] h-[600px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(99,102,241,0.12)_0%,rgba(124,58,237,0.04)_50%,transparent_100%)] filter blur-[90px] translate-x-[-50%] pointer-events-none" />
-        <div className="absolute top-[45%] right-[8%] w-[450px] h-[450px] bg-[radial-gradient(circle,rgba(99,102,241,0.08)_0%,transparent_70%)] filter blur-[70px] pointer-events-none" />
-        <div className="absolute bottom-[-15%] left-[10%] w-[800px] h-[500px] bg-[radial-gradient(circle,rgba(236,72,153,0.05)_0%,transparent_75%)] filter blur-[100px] pointer-events-none" />
+        {/* Blob 1 - Slow float */}
+        <div className="bg-floating-blob-1 absolute top-[-10%] left-[20%] w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.13)_0%,rgba(124,58,237,0.03)_60%,transparent_100%)] filter blur-[80px]" />
+        
+        {/* Blob 2 - Counter float */}
+        <div className="bg-floating-blob-2 absolute bottom-[10%] right-[10%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(236,72,153,0.06)_0%,rgba(99,102,241,0.02)_60%,transparent_100%)] filter blur-[90px]" />
+        
+        {/* Ambient Top Glow Grid */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[300px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(99,102,241,0.08)_0%,transparent_100%)] filter blur-[50px]" />
       </div>
 
-      {/* Navigation header matched to SapioMatch nav-island */}
-      <header className="relative z-50 border-b border-gray-800 bg-[#070a13]/80 backdrop-blur-md sticky top-0">
+      {/* Navigation Header */}
+      <header className="relative z-50 border-b border-gray-800/80 bg-[#070a13]/80 backdrop-blur-lg sticky top-0">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
+          
+          {/* Logo / Brand */}
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/25">
-              <Sparkles className="h-5 w-5 text-white animate-pulse" />
+            <div className="h-10 w-10 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/25 transition-transform hover:rotate-12 duration-300">
+              <Sparkles className="h-5.5 w-5.5 text-white animate-pulse" />
             </div>
             <div>
-              <span className="font-extrabold text-lg tracking-tight text-white font-sans">ConsensuSync</span>
-              <span className="text-[10px] block text-indigo-400 font-mono tracking-widest uppercase -mt-0.5">
+              <span className="font-extrabold text-xl tracking-tight text-white block">ConsensuSync</span>
+              <span className="text-[10px] block text-indigo-400 font-mono tracking-widest uppercase -mt-1 font-bold">
                 Consensus Engine
               </span>
             </div>
           </div>
 
-          {/* Navigation links */}
-          <nav className="flex space-x-1 bg-slate-900/60 p-1 rounded-xl border border-gray-800">
+          {/* Navigation island */}
+          <nav className="flex space-x-1 bg-slate-900/60 p-1.5 rounded-2xl border border-gray-800/60 backdrop-blur-md shadow-inner">
             <button
               onClick={() => setActiveTab('dining')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold tracking-wide transition-all ${
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-300 ${
                 activeTab === 'dining'
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 scale-[1.02]'
                   : 'text-gray-400 hover:text-gray-200'
               }`}
             >
@@ -44,9 +52,9 @@ function App() {
             </button>
             <button
               onClick={() => setActiveTab('bills')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold tracking-wide transition-all ${
+              className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all duration-300 ${
                 activeTab === 'bills'
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25 scale-[1.02]'
                   : 'text-gray-400 hover:text-gray-200'
               }`}
             >
