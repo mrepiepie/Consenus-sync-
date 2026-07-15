@@ -441,8 +441,8 @@ function App() {
               <div className="w-3.5 h-3.5 bg-violet-500 rounded-[4px] rotate-45 transform origin-center shadow-[0_0_14px_rgba(139,92,246,0.75)]" />
             </div>
             <div className="flex items-baseline gap-1.5 ml-1">
-              <span className="font-extrabold text-2xl tracking-tight text-white bg-clip-text">Resolve</span>
-              <span className="text-gray-550 text-xs font-semibold lowercase tracking-wider">loyalty</span>
+              <span className="font-extrabold text-2xl tracking-tight text-white bg-clip-text">Consensus</span>
+              <span className="text-gray-550 text-xs font-semibold lowercase tracking-wider">sync</span>
             </div>
           </div>
 
