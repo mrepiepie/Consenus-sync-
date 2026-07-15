@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { calculateResentmentMinimizer, calculateDebtSettlement } from './utils/algorithms';
 import { 
-  Layers, Wallet, Sparkles, Plus, Trash2, ShieldAlert, Award, RotateCcw, CreditCard, Users, ChevronRight, Zap
+  Layers, Wallet, Sparkles, Plus, Trash2, ShieldAlert, Award, RotateCcw, CreditCard, Users, ChevronRight, HelpCircle, ArrowRight, ArrowLeft
 } from 'lucide-react';
 import gsap from 'gsap';
 
@@ -13,16 +13,36 @@ const DEFAULT_EXPENSES = [
   { id: '3', description: 'Snacks & Drinks', amount: 45, paidBy: 'Charlie', splitAmong: ['Charlie', 'Dana'] }
 ];
 
+const TUTORIAL_STEPS = [
+  {
+    title: "Step 1: The Group Directory",
+    desc: "Start by entering all group members here. This list synchronizes immediately to both calculators, ensuring names always match perfectly.",
+    target: "step-directory"
+  },
+  {
+    title: "Step 2: Restaurant Ballots & Vetoes",
+    desc: "In the Dinner Decider, add restaurants. You can veto options to instantly eliminate them, or rank them to find the winner.",
+    target: "step-decider"
+  },
+  {
+    title: "Step 3: Expenses Ledger",
+    desc: "In the Expense Splitter, record bills. Select who paid and split the amount among specific members.",
+    target: "step-splitter"
+  },
+  {
+    title: "Step 4: Simplified Settlements",
+    desc: "The algorithm instantly consolidates all transactions to give the absolute minimum number of payments required.",
+    target: "step-settlements"
+  }
+];
+
 function App() {
-  // Shared single source of truth for group members
   const [members, setMembers] = useState(() => {
     const saved = localStorage.getItem('resolve_members');
     return saved ? JSON.parse(saved) : DEFAULT_MEMBERS;
   });
 
   const [newMemberName, setNewMemberName] = useState('');
-
-  // Dinner Decider State
   const [options, setOptions] = useState(() => {
     const saved = localStorage.getItem('resolve_options');
     return saved ? JSON.parse(saved) : DEFAULT_OPTIONS;
@@ -32,7 +52,6 @@ function App() {
   const [participants, setParticipants] = useState(() => {
     const saved = localStorage.getItem('resolve_participants');
     if (saved) return JSON.parse(saved);
-    // Initialize preferences mapped to default options
     return DEFAULT_MEMBERS.map(name => ({
       id: name,
       name,
@@ -56,9 +75,17 @@ function App() {
   const [payer, setPayer] = useState('');
   const [splitList, setSplitList] = useState([]);
 
+  // Tutorial State
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [tutorialIndex, setTutorialIndex] = useState(0);
+
+  // Parallax mouse variables
+  const [parallaxOffset, setParallaxOffset] = useState({ x: 0, y: 0 });
+
   const deciderResultsRef = useRef(null);
   const splitterResultsRef = useRef(null);
   const canvasRef = useRef(null);
+  const heroTextRef = useRef(null);
 
   // Sync state with LocalStorage
   useEffect(() => {
@@ -115,6 +142,27 @@ function App() {
       return { ...p, preferences: filtered };
     }));
   }, [options]);
+
+  // GSAP Title and text entrance animation + Mouse Parallax
+  useEffect(() => {
+    if (heroTextRef.current) {
+      const elements = heroTextRef.current.querySelectorAll('.gsap-reveal');
+      gsap.fromTo(elements, 
+        { opacity: 0, y: 25 },
+        { opacity: 1, y: 0, duration: 0.8, stagger: 0.15, ease: "power3.out" }
+      );
+    }
+
+    const handleParallaxMove = (e) => {
+      const factor = 18;
+      const x = (window.innerWidth / 2 - e.clientX) / factor;
+      const y = (window.innerHeight / 2 - e.clientY) / factor;
+      setParallaxOffset({ x, y });
+    };
+
+    window.addEventListener('mousemove', handleParallaxMove);
+    return () => window.removeEventListener('mousemove', handleParallaxMove);
+  }, []);
 
   // Interactive Background Canvas logic
   useEffect(() => {
@@ -234,6 +282,7 @@ function App() {
     };
   }, []);
 
+  // Shared Member Controls
   const addMember = () => {
     const trimmed = newMemberName.trim();
     if (trimmed && !members.includes(trimmed)) {
@@ -331,16 +380,46 @@ function App() {
   const diningResults = calculateResentmentMinimizer(options, participants.map(p => p.preferences), participants.filter(p => p.veto).map(p => p.veto));
   const settlements = calculateDebtSettlement(expenses, members);
 
+  // Focus highlighters for tutorial walkthrough
+  const highlightStep = (targetId) => {
+    const el = document.getElementById(targetId);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // GSAP Highlight effect
+      gsap.fromTo(el, 
+        { outline: '2px solid rgba(99, 102, 241, 0)' },
+        { outline: '2px solid rgba(99, 102, 241, 1)', duration: 0.4, yoyo: true, repeat: 3 }
+      );
+    }
+  };
+
+  useEffect(() => {
+    if (showTutorial) {
+      highlightStep(TUTORIAL_STEPS[tutorialIndex].target);
+    }
+  }, [tutorialIndex, showTutorial]);
+
   return (
     <div className="min-h-screen text-gray-150 flex flex-col relative overflow-hidden bg-black font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
       
-      {/* Background Interactive canvas with absolute low z-index */}
+      {/* Background Interactive canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none" style={{ pointerEvents: 'none' }} />
+
+      {/* Parallax Floating Glow Blob */}
+      <div 
+        className="absolute w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(99,102,241,0.08)_0%,transparent_70%)] blur-[90px] pointer-events-none z-0"
+        style={{
+          transform: `translate(${parallaxOffset.x}px, ${parallaxOffset.y}px)`,
+          transition: 'transform 0.1s ease-out',
+          top: '20%',
+          left: '10%'
+        }}
+      />
 
       {/* Top Neon Border Gradient */}
       <div className="absolute top-0 left-0 w-full h-[3px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 z-50 shadow-[0_3px_20px_rgba(99,102,241,0.5)]" />
 
-      {/* Premium Header Layout */}
+      {/* Header bar */}
       <header className="relative z-50 border-b border-zinc-900 bg-black/85 backdrop-blur-xl sticky top-0 shadow-sm">
         <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3.5">
@@ -353,41 +432,93 @@ function App() {
             </div>
             <div className="flex items-baseline gap-1.5 ml-1">
               <span className="font-extrabold text-2xl tracking-tight text-white bg-clip-text">Resolve</span>
-              <span className="text-gray-500 text-xs font-semibold lowercase tracking-wider">loyalty</span>
+              <span className="text-gray-550 text-xs font-semibold lowercase tracking-wider">loyalty</span>
             </div>
           </div>
 
-          <button 
-            onClick={resetToDefault}
-            className="flex items-center gap-2 bg-zinc-950 border border-zinc-800 hover:border-indigo-500/50 hover:text-white text-gray-400 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer shadow-inner"
-          >
-            <RotateCcw className="h-3.5 w-3.5 text-indigo-400" /> Refresh App
-          </button>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => {
+                setShowTutorial(true);
+                setTutorialIndex(0);
+              }}
+              className="flex items-center gap-1.5 bg-indigo-600/10 border border-indigo-500/20 hover:border-indigo-500/50 hover:bg-indigo-600/20 text-indigo-400 px-4.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer"
+            >
+              <HelpCircle className="h-4 w-4" /> Start Tutorial
+            </button>
+            <button 
+              onClick={resetToDefault}
+              className="flex items-center gap-2 bg-zinc-950 border border-zinc-800 hover:border-indigo-500/50 hover:text-white text-gray-400 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer shadow-inner"
+            >
+              <RotateCcw className="h-3.5 w-3.5 text-indigo-400" /> Refresh App
+            </button>
+          </div>
         </div>
       </header>
 
       {/* Core Dashboard Workspace */}
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-6 lg:px-8 py-10 space-y-8">
         
-        {/* Intro Premium Hero Explainer Box */}
-        <div className="border border-zinc-900 bg-gradient-to-br from-zinc-950 to-black p-8 rounded-2xl relative overflow-hidden shadow-2xl">
+        {/* Interactive Tutorial Modal / Banner */}
+        {showTutorial && (
+          <div className="border border-indigo-500/30 bg-indigo-950/20 p-6 rounded-2xl relative overflow-hidden shadow-2xl animate-fade-in z-45">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-xl pointer-events-none" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-sm font-extrabold text-indigo-400 uppercase tracking-wider mb-1">
+                  {TUTORIAL_STEPS[tutorialIndex].title}
+                </h3>
+                <p className="text-gray-300 text-sm max-w-3xl leading-relaxed">
+                  {TUTORIAL_STEPS[tutorialIndex].desc}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button 
+                  disabled={tutorialIndex === 0}
+                  onClick={() => setTutorialIndex(prev => prev - 1)}
+                  className="bg-zinc-900 border border-zinc-800 disabled:opacity-40 text-gray-300 p-2.5 rounded-xl text-xs font-bold transition cursor-pointer"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
+                {tutorialIndex < TUTORIAL_STEPS.length - 1 ? (
+                  <button 
+                    onClick={() => setTutorialIndex(prev => prev + 1)}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1"
+                  >
+                    Next Step <ArrowRight className="h-4.5 w-4.5" />
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => setShowTutorial(false)}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white px-4.5 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer"
+                  >
+                    Got It!
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Intro Premium Hero Box */}
+        <div ref={heroTextRef} className="border border-zinc-900 bg-gradient-to-br from-zinc-950 to-black p-8 rounded-2xl relative overflow-hidden shadow-2xl">
           <div className="absolute top-0 right-0 w-48 h-48 bg-indigo-500/5 rounded-full blur-[80px] pointer-events-none" />
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 gsap-reveal opacity-0">
             <span className="px-2.5 py-0.5 bg-indigo-950/50 text-indigo-400 border border-indigo-900/30 rounded-full text-[10px] font-bold uppercase tracking-wider">
               Smart Engine
             </span>
           </div>
-          <h2 className="text-2xl font-extrabold text-white tracking-tight flex items-center gap-3">
+          <h2 className="text-2xl font-extrabold text-white tracking-tight flex items-center gap-3 gsap-reveal opacity-0">
             <Sparkles className="h-6 w-6 text-indigo-400 animate-pulse" />
             Decide Venues &amp; Split Debts Dynamically
           </h2>
-          <p className="text-gray-400 text-sm max-w-3xl leading-relaxed mt-2.5">
+          <p className="text-gray-400 text-sm max-w-3xl leading-relaxed mt-2.5 gsap-reveal opacity-0">
             Synchronize your friends once, then decide where to go and settle splits simultaneously. Drag, drop, veto, and consolidated settlements will follow your group automatically.
           </p>
         </div>
 
         {/* SECTION 1: Shared Group Members Panel */}
-        <div className="border border-zinc-900 bg-zinc-950/40 p-6 rounded-2xl relative">
+        <div id="step-directory" className="border border-zinc-900 bg-zinc-950/40 p-6 rounded-2xl relative transition-all duration-300">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-indigo-400" />
@@ -446,7 +577,7 @@ function App() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* SECTION 2: DINNER DECIDER */}
-          <div className="lg:col-span-5 space-y-6">
+          <div id="step-decider" className="lg:col-span-5 space-y-6 transition-all duration-300">
             <div className="border border-zinc-900 bg-zinc-950/40 p-6 rounded-2xl space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -519,7 +650,7 @@ function App() {
 
               {/* Preference Editor Box */}
               {editingParticipantId && (
-                <div className="border border-indigo-500/20 bg-indigo-950/10 p-4 rounded-xl space-y-4 animate-fade-in text-xs">
+                <div className="border border-indigo-500/20 bg-indigo-955/10 p-4 rounded-xl space-y-4 animate-fade-in text-xs">
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-white">Ballot for {editingParticipantId}</span>
                     <button 
@@ -599,7 +730,7 @@ function App() {
           </div>
 
           {/* SECTION 3: EXPENSE SPLITTER */}
-          <div className="lg:col-span-7 space-y-6">
+          <div id="step-splitter" className="lg:col-span-7 space-y-6 transition-all duration-300">
             <div className="border border-zinc-900 bg-zinc-950/40 p-6 rounded-2xl space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -709,7 +840,7 @@ function App() {
                 </div>
 
                 {/* Settlements Column */}
-                <div className="space-y-3">
+                <div id="step-settlements" className="space-y-3 transition-all duration-300">
                   <div className="flex items-center gap-1.5">
                     <CreditCard className="h-4 w-4 text-indigo-400" />
                     <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">Settlements Ledger</label>
