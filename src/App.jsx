@@ -361,7 +361,7 @@ function App() {
             onClick={resetToDefault}
             className="flex items-center gap-2 bg-zinc-950 border border-zinc-800 hover:border-indigo-500/50 hover:text-white text-gray-400 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer shadow-inner"
           >
-            <RotateCcw className="h-3.5 w-3.5 text-indigo-400" /> Reset to Demo
+            <RotateCcw className="h-3.5 w-3.5 text-indigo-400" /> Refresh App
           </button>
         </div>
       </header>
