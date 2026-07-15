@@ -68,13 +68,24 @@ export function calculateResentmentMinimizer(candidates, ballots, vetoes = []) {
  * Resolves split bill conflicts by calculating the minimum number of transactions
  * required to settle all debts among group members.
  * 
- * @param {Array<Object>} transactions - List of raw expenses: { paidBy, amount, splitAmong: [name, ...] }
+ * @param {Array<Object>} expenses - List of raw expenses: { paidBy, amount, splitAmong: [name, ...] }
  * @param {Array<string>} members - List of group member names.
  * @returns {Array<Object>} List of settlement transactions: { from, to, amount }
  */
 export function calculateDebtSettlement(expenses, members) {
   const netBalances = {};
-  members.forEach(m => {
+  
+  // CRITICAL FIX: Ensure netBalances accounts for EVERY member that exists in any transaction,
+  // not just the initial DEFAULT_MEMBERS.
+  const allInvolvedMembers = new Set(members);
+  expenses.forEach(exp => {
+    if (exp.paidBy) allInvolvedMembers.add(exp.paidBy);
+    if (exp.splitAmong) {
+      exp.splitAmong.forEach(m => allInvolvedMembers.add(m));
+    }
+  });
+
+  allInvolvedMembers.forEach(m => {
     netBalances[m] = 0;
   });
 
