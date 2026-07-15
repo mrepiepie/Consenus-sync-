@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import ActivityDecider from './components/ActivityDecider';
 import BillSplitter from './components/BillSplitter';
-import AlgorithmExplainer from './components/AlgorithmExplainer';
-import { Layers, Wallet, BookOpen, Sparkles } from 'lucide-react';
+import { Layers, Wallet, Sparkles } from 'lucide-react';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dining');
@@ -11,9 +10,9 @@ function App() {
     <div className="min-h-screen text-gray-100 flex flex-col relative overflow-hidden bg-[#070a13]">
       {/* Background blobs matched to SapioMatch template design */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
-        <div className="absolute top-[-20%] left-[50%] w-[1000px] height-[600px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(99,102,241,0.12)_0%,rgba(124,58,237,0.04)_50%,transparent_100%)] filter blur-[90px] translate-x-[-50%] pointer-events-none" />
-        <div className="absolute top-[45%] right-[8%] w-[450px] height-[450px] bg-[radial-gradient(circle,rgba(99,102,241,0.08)_0%,transparent_70%)] filter blur-[70px] pointer-events-none" />
-        <div className="absolute bottom-[-15%] left-[10%] w-[800px] height-[500px] bg-[radial-gradient(circle,rgba(236,72,153,0.05)_0%,transparent_75%)] filter blur-[100px] pointer-events-none" />
+        <div className="absolute top-[-20%] left-[50%] w-[1000px] h-[600px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,rgba(99,102,241,0.12)_0%,rgba(124,58,237,0.04)_50%,transparent_100%)] filter blur-[90px] translate-x-[-50%] pointer-events-none" />
+        <div className="absolute top-[45%] right-[8%] w-[450px] h-[450px] bg-[radial-gradient(circle,rgba(99,102,241,0.08)_0%,transparent_70%)] filter blur-[70px] pointer-events-none" />
+        <div className="absolute bottom-[-15%] left-[10%] w-[800px] h-[500px] bg-[radial-gradient(circle,rgba(236,72,153,0.05)_0%,transparent_75%)] filter blur-[100px] pointer-events-none" />
       </div>
 
       {/* Navigation header matched to SapioMatch nav-island */}
@@ -53,16 +52,6 @@ function App() {
             >
               <Wallet className="h-4 w-4" /> Expense Splitter
             </button>
-            <button
-              onClick={() => setActiveTab('explain')}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold tracking-wide transition-all ${
-                activeTab === 'explain'
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
-                  : 'text-gray-400 hover:text-gray-200'
-              }`}
-            >
-              <BookOpen className="h-4 w-4" /> How it Works
-            </button>
           </nav>
         </div>
       </header>
@@ -71,7 +60,6 @@ function App() {
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-6 lg:px-8 py-12">
         {activeTab === 'dining' && <ActivityDecider />}
         {activeTab === 'bills' && <BillSplitter />}
-        {activeTab === 'explain' && <AlgorithmExplainer />}
       </main>
 
       {/* Footer */}
