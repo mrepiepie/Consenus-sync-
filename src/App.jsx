@@ -133,14 +133,27 @@ function App() {
     }
   }, [members]);
 
+  // Handle options changes. To prevent infinite loop/save bugs, we only run updates
+  // if options are actually added or removed.
   useEffect(() => {
-    setParticipants(prev => prev.map(p => {
-      let filtered = p.preferences.filter(o => options.includes(o));
-      options.forEach(o => {
-        if (!filtered.includes(o)) filtered.push(o);
+    setParticipants(prev => {
+      let isDifferent = false;
+      const updated = prev.map(p => {
+        let filtered = p.preferences.filter(o => options.includes(o));
+        let added = false;
+        options.forEach(o => {
+          if (!filtered.includes(o)) {
+            filtered.push(o);
+            added = true;
+          }
+        });
+        if (filtered.length !== p.preferences.length || added) {
+          isDifferent = true;
+        }
+        return { ...p, preferences: filtered };
       });
-      return { ...p, preferences: filtered };
-    }));
+      return isDifferent ? updated : prev;
+    });
   }, [options]);
 
   // GSAP Title and text entrance animation + Mouse Parallax
@@ -324,7 +337,7 @@ function App() {
   };
 
   const saveParticipantEdit = () => {
-    setParticipants(participants.map(p => {
+    setParticipants(prev => prev.map(p => {
       if (p.id === editingParticipantId) {
         return { ...p, veto: editVeto, preferences: editPrefs };
       }
@@ -461,7 +474,7 @@ function App() {
         
         {/* Interactive Tutorial Modal / Banner */}
         {showTutorial && (
-          <div className="border border-indigo-500/30 bg-indigo-950/20 p-6 rounded-2xl relative overflow-hidden shadow-2xl animate-fade-in z-45">
+          <div className="border border-indigo-500/30 bg-indigo-955/20 p-6 rounded-2xl relative overflow-hidden shadow-2xl animate-fade-in z-45">
             <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-xl pointer-events-none" />
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>

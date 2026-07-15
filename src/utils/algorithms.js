@@ -23,21 +23,23 @@ export function calculateResentmentMinimizer(candidates, ballots, vetoes = []) {
   }
 
   const numCandidates = candidates.length;
-  // Borda Point scale: 1st choice gets (N-1) points, last gets 0 points.
+  
+  // Borda Point scale: 
+  // 1st choice (index 0) gets (numCandidates - 1) points
+  // Last choice gets 0 points.
+  // If ballot is empty, or candidate is not explicitly ranked in the ballot, assign 0.
   const getBordaPoints = (candidate, ballot) => {
+    if (!ballot || ballot.length === 0) return 0;
     const rankIndex = ballot.indexOf(candidate);
-    if (rankIndex === -1) return 0; // Not ranked
+    if (rankIndex === -1) return 0;
     return numCandidates - 1 - rankIndex;
   };
 
   const results = validCandidates.map(cand => {
-    // Collect points assigned to this candidate by each voter
+    // Only map Borda points if ballots exist
     const scores = ballots.map(ballot => getBordaPoints(cand, ballot));
-    
-    // Sum of points = Group Utility
     const totalUtility = scores.reduce((sum, val) => sum + val, 0);
 
-    // Calculate Variance (to measure how polarized the group is on this option)
     let variance = 0;
     if (scores.length > 0) {
       const mean = totalUtility / scores.length;
@@ -51,7 +53,7 @@ export function calculateResentmentMinimizer(candidates, ballots, vetoes = []) {
     };
   });
 
-  // Sort: 1st by highest total utility score, 2nd by lowest variance (less division / lower resentment)
+  // Sort: highest total utility score first, lowest variance second (less polarization)
   results.sort((a, b) => {
     if (b.score !== a.score) {
       return b.score - a.score;
@@ -78,8 +80,6 @@ export function calculateResentmentMinimizer(candidates, ballots, vetoes = []) {
 export function calculateDebtSettlement(expenses, members) {
   const netBalances = {};
   
-  // CRITICAL FIX: Ensure netBalances accounts for EVERY member that exists in any transaction,
-  // not just the initial DEFAULT_MEMBERS.
   const allInvolvedMembers = new Set(members);
   expenses.forEach(exp => {
     if (exp.paidBy) allInvolvedMembers.add(exp.paidBy);
