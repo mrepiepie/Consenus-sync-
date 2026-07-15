@@ -152,7 +152,7 @@ function App() {
             </div>
             
             <div className="flex items-baseline gap-1.5 ml-1">
-              <span className="font-extrabold text-2xl tracking-tight text-white font-sans">ConsensuSync</span>
+              <span className="font-extrabold text-2xl tracking-tight text-white font-sans">Resolve</span>
               <span className="text-gray-400 text-xs font-normal lowercase tracking-wide font-sans">loyalty</span>
             </div>
           </div>
@@ -191,7 +191,7 @@ function App() {
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-zinc-950 bg-black/40 py-6 text-center text-xs text-gray-600">
-        ConsensuSync decision-making platform &copy; {new Date().getFullYear()} &middot; Built for Club Application
+        Resolve decision-making platform &copy; {new Date().getFullYear()} &middot; Built for Club Application
       </footer>
     </div>
   );
