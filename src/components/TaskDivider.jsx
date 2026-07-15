@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { calculateStableMatching } from '../utils/algorithms';
 import { 
   Briefcase, Plus, Trash2, ListOrdered, 
   HelpCircle, RefreshCw, Layers, CheckCircle2 
 } from 'lucide-react';
+import gsap from 'gsap';
 
 export default function TaskDivider() {
-  // Scenario: Dividing coding, design, and ops tasks in a group project fairly
   const [members, setMembers] = useState([
     { id: 'Alex', name: 'Alex', preferences: ['Frontend UI', 'API & Database', 'QA & Testing', 'DevOps Setup'] },
     { id: 'Blake', name: 'Blake', preferences: ['API & Database', 'Frontend UI', 'DevOps Setup', 'QA & Testing'] },
@@ -27,6 +27,21 @@ export default function TaskDivider() {
   const [editingTaskId, setEditingTaskId] = useState(null);
   const [editRankings, setEditRankings] = useState([]);
   const [editCapacity, setEditCapacity] = useState(1);
+
+  const allocationPanelRef = useRef(null);
+
+  const result = calculateStableMatching(members, tasks);
+
+  // GSAP animation triggered when allocations change
+  useEffect(() => {
+    if (allocationPanelRef.current) {
+      const cards = allocationPanelRef.current.querySelectorAll('.task-assignment-card');
+      gsap.fromTo(cards, 
+        { opacity: 0, y: 10, scale: 0.98 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.4, stagger: 0.08, ease: "power2.out" }
+      );
+    }
+  }, [members, tasks]);
 
   const startEditMember = (m) => {
     setEditingMemberId(m.id);
@@ -70,8 +85,6 @@ export default function TaskDivider() {
     updated[nextIndex] = temp;
     setList(updated);
   };
-
-  const result = calculateStableMatching(members, tasks);
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -130,7 +143,7 @@ export default function TaskDivider() {
                   className={`p-3.5 rounded-xl border text-sm cursor-pointer transition ${
                     editingTaskId === t.id 
                     ? 'bg-indigo-950/20 border-indigo-500/80 shadow-md shadow-indigo-500/5' 
-                    : 'bg-slate-950/60 border-gray-850 hover:border-indigo-500/30'
+                    : 'bg-slate-955/60 border-gray-850 hover:border-indigo-500/30'
                   }`}
                 >
                   <div className="flex justify-between items-center">
@@ -152,7 +165,7 @@ export default function TaskDivider() {
         <div className="lg:col-span-2 space-y-6">
           {/* Member Preferences Editor */}
           {editingMemberId && (
-            <div className="border border-indigo-500/20 bg-indigo-950/5 backdrop-blur-md p-6 rounded-2xl animate-fade-in">
+            <div className="border border-indigo-500/20 bg-indigo-955/5 backdrop-blur-md p-6 rounded-2xl animate-fade-in">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-bold text-white">
                   Rank Task Preferences: {editingMemberId}
@@ -166,7 +179,7 @@ export default function TaskDivider() {
               </div>
               <div className="space-y-1.5">
                 {editPrefs.map((pref, idx) => (
-                  <div key={pref} className="flex justify-between items-center bg-slate-950 p-2.5 rounded-xl border border-gray-850 text-xs">
+                  <div key={pref} className="flex justify-between items-center bg-slate-955 p-2.5 rounded-xl border border-gray-850 text-xs">
                     <span className="font-semibold text-gray-300 flex items-center gap-2">
                       <span className="w-5 h-5 flex items-center justify-center bg-indigo-900/30 text-indigo-300 rounded-full font-bold">
                         {idx + 1}
@@ -229,7 +242,7 @@ export default function TaskDivider() {
                   </label>
                   <div className="space-y-1.5">
                     {editRankings.map((rank, idx) => (
-                      <div key={rank} className="flex justify-between items-center bg-slate-950 p-2.5 rounded-xl border border-gray-850 text-xs">
+                      <div key={rank} className="flex justify-between items-center bg-slate-955 p-2.5 rounded-xl border border-gray-850 text-xs">
                         <span className="font-semibold text-gray-300">{rank}</span>
                         <div className="flex gap-1">
                           <button 
@@ -256,7 +269,7 @@ export default function TaskDivider() {
           )}
 
           {/* Allocation Results */}
-          <div className="border border-gray-850 bg-slate-900/30 backdrop-blur-md p-6 rounded-2xl">
+          <div ref={allocationPanelRef} className="border border-gray-850 bg-slate-900/30 backdrop-blur-md p-6 rounded-2xl">
             <h3 className="text-sm font-bold uppercase tracking-wider text-indigo-400 mb-6 flex items-center gap-2">
               Stable Task Allocations
             </h3>
@@ -265,7 +278,7 @@ export default function TaskDivider() {
               {Object.keys(result.assignments).map(taskId => {
                 const assigned = result.assignments[taskId];
                 return (
-                  <div key={taskId} className="bg-slate-950 p-4 rounded-xl border border-gray-855">
+                  <div key={taskId} className="task-assignment-card bg-slate-950 p-4 rounded-xl border border-gray-855">
                     <div className="text-xs text-indigo-400 font-bold uppercase tracking-wider">{taskId}</div>
                     <div className="mt-2.5 space-y-1.5">
                       {assigned.length > 0 ? (
