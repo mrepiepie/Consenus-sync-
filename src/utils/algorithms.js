@@ -3,14 +3,17 @@
  */
 
 /**
- * 1. Schulze Method (Beatpath Ranked-Choice Voting)
+ * 1. Schulze Method (Beatpath Ranked-Choice Voting) with voter weight support
  * Used to find the Condorcet winner by calculating strongest path relations.
  */
-export function calculateSchulze(candidates, ballots) {
+export function calculateSchulze(candidates, ballots, weights = []) {
   const numCandidates = candidates.length;
   const d = Array.from({ length: numCandidates }, () => Array(numCandidates).fill(0));
 
-  ballots.forEach(ballot => {
+  ballots.forEach((ballot, idx) => {
+    // Default weight is 1.0 if not specified
+    const voterWeight = Number(weights[idx]) || 1.0;
+
     for (let i = 0; i < numCandidates; i++) {
       for (let j = 0; j < numCandidates; j++) {
         if (i === j) continue;
@@ -25,10 +28,10 @@ export function calculateSchulze(candidates, ballots) {
 
         if (hasI && hasJ) {
           if (rankI < rankJ) {
-            d[i][j]++;
+            d[i][j] += voterWeight;
           }
         } else if (hasI && !hasJ) {
-          d[i][j]++;
+          d[i][j] += voterWeight;
         }
       }
     }
@@ -74,8 +77,8 @@ export function calculateSchulze(candidates, ballots) {
 
   const ranked = candidates.map((cand, idx) => ({
     name: cand,
-    score: winCount[idx],
-    wins: winCount[idx],
+    score: Number(winCount[idx].toFixed(2)),
+    wins: Number(winCount[idx].toFixed(2)),
   })).sort((a, b) => b.score - a.score);
 
   return {
