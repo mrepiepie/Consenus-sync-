@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import ActivityDecider from './components/ActivityDecider';
-import TaskDivider from './components/TaskDivider';
+import BillSplitter from './components/BillSplitter';
 import AlgorithmExplainer from './components/AlgorithmExplainer';
-import { Layers, Briefcase, BookOpen, GitMerge, Sparkles } from 'lucide-react';
+import { Layers, Wallet, BookOpen, Sparkles } from 'lucide-react';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dining');
@@ -31,7 +31,7 @@ function App() {
             </div>
           </div>
 
-          {/* Navigation links structured like SapioMatch Link Bar */}
+          {/* Navigation links */}
           <nav className="flex space-x-1 bg-slate-900/60 p-1 rounded-xl border border-gray-800">
             <button
               onClick={() => setActiveTab('dining')}
@@ -41,17 +41,17 @@ function App() {
                   : 'text-gray-400 hover:text-gray-200'
               }`}
             >
-              <Layers className="h-4 w-4" /> Group Decisions
+              <Layers className="h-4 w-4" /> Dinner Decider
             </button>
             <button
-              onClick={() => setActiveTab('tasks')}
+              onClick={() => setActiveTab('bills')}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs font-bold tracking-wide transition-all ${
-                activeTab === 'tasks'
+                activeTab === 'bills'
                   ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20'
                   : 'text-gray-400 hover:text-gray-200'
               }`}
             >
-              <Briefcase className="h-4 w-4" /> Task Division
+              <Wallet className="h-4 w-4" /> Expense Splitter
             </button>
             <button
               onClick={() => setActiveTab('explain')}
@@ -70,7 +70,7 @@ function App() {
       {/* Main Content Area */}
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-6 lg:px-8 py-12">
         {activeTab === 'dining' && <ActivityDecider />}
-        {activeTab === 'tasks' && <TaskDivider />}
+        {activeTab === 'bills' && <BillSplitter />}
         {activeTab === 'explain' && <AlgorithmExplainer />}
       </main>
 

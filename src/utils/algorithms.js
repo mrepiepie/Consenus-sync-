@@ -5,19 +5,9 @@
 /**
  * 1. Schulze Method (Beatpath Ranked-Choice Voting)
  * Used to find the Condorcet winner by calculating strongest path relations.
- * 
- * @param {Array<string>} candidates - List of candidate IDs/names.
- * @param {Array<Array<string>>} ballots - List of preferences. Each ballot is an ordered array of candidate IDs (1st choice, 2nd choice, etc.)
- * @returns {Object} { winner, paths, pairwiseMatrix }
  */
 export function calculateSchulze(candidates, ballots) {
   const numCandidates = candidates.length;
-  const candidateIndexMap = {};
-  candidates.forEach((c, idx) => {
-    candidateIndexMap[c] = idx;
-  });
-
-  // 1. Initialize Pairwise Preferences Matrix (d[V, W] = number of voters who prefer V over W)
   const d = Array.from({ length: numCandidates }, () => Array(numCandidates).fill(0));
 
   ballots.forEach(ballot => {
@@ -38,13 +28,12 @@ export function calculateSchulze(candidates, ballots) {
             d[i][j]++;
           }
         } else if (hasI && !hasJ) {
-          d[i][j]++; // Prefer I (since J is unranked)
+          d[i][j]++;
         }
       }
     }
   });
 
-  // 2. Initialize Strongest Path Matrix (p[i][j])
   const p = Array.from({ length: numCandidates }, () => Array(numCandidates).fill(0));
 
   for (let i = 0; i < numCandidates; i++) {
@@ -59,8 +48,7 @@ export function calculateSchulze(candidates, ballots) {
     }
   }
 
-  // 3. Floyd-Warshall variant to find strongest path (beatpaths)
-  // The outer loop MUST be the intermediate node 'i' (customarily 'k' in Floyd-Warshall)
+  // Floyd-Warshall transitive closure path strength search
   for (let i = 0; i < numCandidates; i++) {
     for (let j = 0; j < numCandidates; j++) {
       if (i !== j) {
@@ -73,7 +61,6 @@ export function calculateSchulze(candidates, ballots) {
     }
   }
 
-  // 4. Rank candidates based on strongest path comparisons
   const winCount = Array(numCandidates).fill(0);
   for (let i = 0; i < numCandidates; i++) {
     for (let j = 0; j < numCandidates; j++) {
@@ -100,82 +87,79 @@ export function calculateSchulze(candidates, ballots) {
 }
 
 /**
- * 2. Gale-Shapley Stable Marriage / Task Allocator
- * Matches group members to their preferred tasks.
+ * 2. Debt Simplification Algorithm (Bill Splitter)
+ * Resolves split bill conflicts by calculating the minimum number of transactions
+ * required to settle all debts among group members.
  * 
- * @param {Array<Object>} members - Array of { id, preferences: [taskId, ...] }
- * @param {Array<Object>} tasks - Array of { id, capacity: number, rankings: [memberId, ...] }
- * @returns {Object} { assignments: { taskId: [memberId, ...] }, steps: Array<string> }
+ * @param {Array<Object>} transactions - List of raw expenses: { paidBy, amount, splitAmong: [name, ...] }
+ * @param {Array<string>} members - List of group member names.
+ * @returns {Array<Object>} List of settlement transactions: { from, to, amount }
  */
-export function calculateStableMatching(members, tasks) {
-  const steps = [];
-  const assignments = {};
-  
-  tasks.forEach(t => {
-    assignments[t.id] = [];
-  });
-
-  const proposalIndex = {};
+export function calculateDebtSettlement(expenses, members) {
+  const netBalances = {};
   members.forEach(m => {
-    proposalIndex[m.id] = 0;
+    netBalances[m] = 0;
   });
 
-  let freeMembers = members.map(m => m.id);
-  let rounds = 0;
-  const maxRounds = 100;
-
-  while (freeMembers.length > 0 && rounds < maxRounds) {
-    rounds++;
-    const currentMemberId = freeMembers.shift();
-    const member = members.find(m => m.id === currentMemberId);
+  // Calculate net balances for each person
+  expenses.forEach(exp => {
+    const amount = Number(exp.amount) || 0;
+    const paidBy = exp.paidBy;
+    const splitAmong = exp.splitAmong || [];
     
-    const prefIndex = proposalIndex[currentMemberId];
-    if (prefIndex >= member.preferences.length) {
-      steps.push(`Round ${rounds}: ${currentMemberId} has no more preferred tasks to propose to.`);
-      continue;
+    if (amount <= 0 || !paidBy || splitAmong.length === 0) return;
+
+    // Payer is credited the total amount
+    netBalances[paidBy] += amount;
+
+    // Each beneficiary owes their share
+    const share = amount / splitAmong.length;
+    splitAmong.forEach(person => {
+      netBalances[person] -= share;
+    });
+  });
+
+  // Separate debtors (negative balance) and creditors (positive balance)
+  const debtors = [];
+  const creditors = [];
+
+  Object.keys(netBalances).forEach(person => {
+    const balance = Number(netBalances[person].toFixed(2));
+    if (balance < -0.01) {
+      debtors.push({ name: person, balance: Math.abs(balance) });
+    } else if (balance > 0.01) {
+      creditors.push({ name: person, balance: balance });
+    }
+  });
+
+  // Sort debtors descending (largest debt first) and creditors descending (largest credit first)
+  debtors.sort((a, b) => b.balance - a.balance);
+  creditors.sort((a, b) => b.balance - a.balance);
+
+  const settlements = [];
+  let dIdx = 0;
+  let cIdx = 0;
+
+  while (dIdx < debtors.length && cIdx < creditors.length) {
+    const debtor = debtors[dIdx];
+    const creditor = creditors[cIdx];
+
+    const amountToSettle = Math.min(debtor.balance, creditor.balance);
+    
+    if (amountToSettle > 0.01) {
+      settlements.push({
+        from: debtor.name,
+        to: creditor.name,
+        amount: Number(amountToSettle.toFixed(2))
+      });
     }
 
-    const targetTaskId = member.preferences[prefIndex];
-    proposalIndex[currentMemberId]++;
-    
-    const task = tasks.find(t => t.id === targetTaskId);
-    const capacity = task.capacity || 1;
-    
-    steps.push(`Round ${rounds}: ${currentMemberId} proposes to task "${targetTaskId}".`);
+    debtor.balance -= amountToSettle;
+    creditor.balance -= amountToSettle;
 
-    const assigned = assignments[targetTaskId];
-
-    if (assigned.length < capacity) {
-      assigned.push(currentMemberId);
-      steps.push(`  - Task "${targetTaskId}" has capacity. Accepted proposal from ${currentMemberId}.`);
-    } else {
-      const allCandidates = [...assigned, currentMemberId];
-      
-      allCandidates.sort((a, b) => {
-        const indexA = task.rankings.indexOf(a);
-        const indexB = task.rankings.indexOf(b);
-        const scoreA = indexA === -1 ? 999 : indexA;
-        const scoreB = indexB === -1 ? 999 : indexB;
-        return scoreA - scoreB;
-      });
-
-      const kept = allCandidates.slice(0, capacity);
-      const rejected = allCandidates.slice(capacity);
-
-      assignments[targetTaskId] = kept;
-
-      rejected.forEach(rej => {
-        steps.push(`  - Task "${targetTaskId}" rejects ${rej} in favor of higher preference.`);
-        if (!freeMembers.includes(rej)) {
-          freeMembers.push(rej);
-        }
-      });
-
-      if (kept.includes(currentMemberId)) {
-        steps.push(`  - Task "${targetTaskId}" accepts ${currentMemberId} temporarily.`);
-      }
-    }
+    if (debtor.balance <= 0.01) dIdx++;
+    if (creditor.balance <= 0.01) cIdx++;
   }
 
-  return { assignments, steps };
+  return settlements;
 }

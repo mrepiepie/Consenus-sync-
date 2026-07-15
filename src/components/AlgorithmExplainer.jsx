@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Layers, HelpCircle, Users } from 'lucide-react';
+import { BookOpen, Layers, Wallet } from 'lucide-react';
 
 export default function AlgorithmExplainer() {
   return (
@@ -14,7 +14,7 @@ export default function AlgorithmExplainer() {
           </h2>
         </div>
         <p className="text-gray-400 text-sm max-w-3xl leading-relaxed">
-          A breakdown of the mathematical methods and algorithms used to turn messy, conflicting group preferences into clean, optimal decisions.
+          A breakdown of the mathematical methods and algorithms used to turn messy, conflicting group preferences and shared costs into clean, optimal results.
         </p>
       </div>
 
@@ -51,33 +51,33 @@ export default function AlgorithmExplainer() {
         </div>
       </div>
 
-      {/* Gale-Shapley explanation */}
+      {/* Debt Simplification explanation */}
       <div className="border border-gray-855 bg-slate-900/30 backdrop-blur-md p-6 rounded-2xl space-y-4">
-        <h3 className="text-xl font-bold text-violet-400 flex items-center gap-2">
-          2. Gale-Shapley Algorithm (Stable Matching)
+        <h3 className="text-xl font-bold text-emerald-400 flex items-center gap-2">
+          2. Debt Simplification Algorithm
         </h3>
         
         <p className="text-sm text-gray-300 leading-relaxed">
-          When splitting up coding tasks, writing documentation, or assigning management roles in a technical team, simple selection creates resentment. The Gale-Shapley algorithm guarantees a **stable matching**. A matching is stable if there are no two elements that would both prefer to be matched with each other than their current matches.
+          Settle shared expenses with the minimum possible transactions. In groups, splitting multiple bills usually results in everyone paying everyone back in a web of tiny bank transfers. ConsensuSync resolves this using a **Net-Balance Debt Settlement Algorithm**:
         </p>
 
         <div className="bg-slate-950 p-5 rounded-xl border border-gray-850 space-y-3">
-          <h4 className="text-xs font-bold text-violet-400 uppercase tracking-wider">Step-by-Step Logic:</h4>
+          <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Step-by-Step Logic:</h4>
           <ol className="list-decimal list-inside space-y-2.5 text-xs text-gray-400">
             <li>
-              <strong className="text-gray-300">Proposals:</strong> In each round, every unmatched member proposes to their top preferred task that hasn't rejected them yet.
+              <strong className="text-gray-300">Compute Net Balances:</strong> Calculate the net sum of what each person paid versus what they owe across all expenses.
             </li>
             <li>
-              <strong className="text-gray-300">Deferred Acceptance:</strong> Tasks hold onto their best proposals (based on task capacity and member suitability ratings) and reject the rest.
+              <strong className="text-gray-300">Segregate Debtors and Creditors:</strong> Divide members into those with negative balances (debtors) and positive balances (creditors).
             </li>
             <li>
-              <strong className="text-gray-300">Iterative Rejection:</strong> Rejected members propose to their next choices in the following round. This repeats until everyone is matched or no more proposals can be made.
+              <strong className="text-gray-300">Greedy Matching:</strong> Match the debtor with the largest debt to the creditor with the largest credit. Settle the maximum possible amount and remove the settled person from the list. Repeat until all balances are zero.
             </li>
           </ol>
         </div>
 
-        <div className="p-4 bg-violet-950/20 border border-violet-500/20 rounded-xl text-xs text-gray-300 leading-relaxed">
-          <span className="font-bold text-violet-400">Why this resolves conflict:</span> The result is mathematically guaranteed to be **optimal for the proposing group** (the members), and eliminates matching envy.
+        <div className="p-4 bg-emerald-950/20 border border-emerald-500/20 rounded-xl text-xs text-gray-300 leading-relaxed">
+          <span className="font-bold text-emerald-400">Why this resolves conflict:</span> Instead of making 10 transactions to settle a weekend trip, the group can clear all debts in just 2 or 3 total payments.
         </div>
       </div>
     </div>
