@@ -1,26 +1,52 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { calculateDebtSettlement } from '../utils/algorithms';
 import { 
-  Plus, Trash2, DollarSign, Wallet, CreditCard
+  Plus, Trash2, DollarSign, Wallet, CreditCard, RotateCcw
 } from 'lucide-react';
 import gsap from 'gsap';
 
+const DEFAULT_MEMBERS = ['Alex', 'Blake', 'Charlie', 'Dana'];
+
+const DEFAULT_EXPENSES = [
+  { id: '1', description: 'Group Lunch', amount: 80, paidBy: 'Alex', splitAmong: ['Alex', 'Blake', 'Charlie', 'Dana'] },
+  { id: '2', description: 'Cab Ride', amount: 30, paidBy: 'Blake', splitAmong: ['Alex', 'Blake', 'Charlie'] },
+  { id: '3', description: 'Snacks & Drinks', amount: 45, paidBy: 'Charlie', splitAmong: ['Charlie', 'Dana'] }
+];
+
 export default function BillSplitter() {
-  const [members, setMembers] = useState(['Alex', 'Blake', 'Charlie', 'Dana']);
+  const [members, setMembers] = useState(() => {
+    const saved = localStorage.getItem('cs_members');
+    return saved ? JSON.parse(saved) : DEFAULT_MEMBERS;
+  });
+
+  const [expenses, setExpenses] = useState(() => {
+    const saved = localStorage.getItem('cs_expenses');
+    return saved ? JSON.parse(saved) : DEFAULT_EXPENSES;
+  });
+
   const [newMember, setNewMember] = useState('');
-
-  const [expenses, setExpenses] = useState([
-    { id: '1', description: 'Group Lunch', amount: 80, paidBy: 'Alex', splitAmong: ['Alex', 'Blake', 'Charlie', 'Dana'] },
-    { id: '2', description: 'Cab Ride', amount: 30, paidBy: 'Blake', splitAmong: ['Alex', 'Blake', 'Charlie'] },
-    { id: '3', description: 'Snacks & Drinks', amount: 45, paidBy: 'Charlie', splitAmong: ['Charlie', 'Dana'] }
-  ]);
-
   const [desc, setDesc] = useState('');
   const [amt, setAmt] = useState('');
   const [payer, setPayer] = useState('Alex');
   const [splitList, setSplitList] = useState(['Alex', 'Blake', 'Charlie', 'Dana']);
 
   const resultsRef = useRef(null);
+
+  // Sync state with localStorage
+  useEffect(() => {
+    localStorage.setItem('cs_members', JSON.stringify(members));
+  }, [members]);
+
+  useEffect(() => {
+    localStorage.setItem('cs_expenses', JSON.stringify(expenses));
+  }, [expenses]);
+
+  // Keep payer option valid if members are modified
+  useEffect(() => {
+    if (members.length > 0 && !members.includes(payer)) {
+      setPayer(members[0]);
+    }
+  }, [members, payer]);
 
   const addMember = () => {
     const trimmed = newMember.trim();
@@ -68,6 +94,12 @@ export default function BillSplitter() {
     }
   };
 
+  const resetToDefault = () => {
+    setMembers(DEFAULT_MEMBERS);
+    setExpenses(DEFAULT_EXPENSES);
+    setSplitList(DEFAULT_MEMBERS);
+  };
+
   const settlements = calculateDebtSettlement(expenses, members);
 
   // GSAP animation when settlements change
@@ -86,13 +118,21 @@ export default function BillSplitter() {
       {/* Intro Header Section */}
       <div className="border border-gray-800 bg-slate-900/40 p-8 rounded-2xl backdrop-blur-md relative overflow-hidden">
         <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none" />
-        <div className="flex items-center gap-3 mb-3">
-          <Wallet className="h-7 w-7 text-indigo-400" />
-          <h2 className="text-2xl font-bold text-white tracking-tight">
-            Shared Expense &amp; Bill Splitter
-          </h2>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Wallet className="h-7 w-7 text-indigo-400" />
+            <h2 className="text-2xl font-bold text-white tracking-tight">
+              Shared Expense &amp; Bill Splitter
+            </h2>
+          </div>
+          <button 
+            onClick={resetToDefault}
+            className="flex items-center gap-2 bg-slate-950 border border-gray-800 hover:border-gray-700 text-gray-300 px-4 py-2 rounded-xl text-xs font-semibold transition"
+          >
+            <RotateCcw className="h-3.5 w-3.5" /> Reset Demo Values
+          </button>
         </div>
-        <p className="text-gray-400 text-sm max-w-3xl leading-relaxed">
+        <p className="text-gray-400 text-sm max-w-3xl leading-relaxed mt-4">
           Resolves conflicts when settling shared expenses among groups. Instead of everyone making messy individual payments back and forth, the engine simplifies balances using a **Greedy Debt Consolidation Algorithm** to compute the absolute minimum number of payments needed.
         </p>
       </div>
@@ -122,7 +162,7 @@ export default function BillSplitter() {
             </div>
             <div className="flex flex-wrap gap-2">
               {members.map(m => (
-                <div key={m} className="flex items-center gap-1.5 bg-slate-950/60 border border-gray-850 px-3 py-1.5 rounded-xl text-xs">
+                <div key={m} className="flex items-center gap-1.5 bg-slate-955/60 border border-gray-850 px-3 py-1.5 rounded-xl text-xs">
                   <span className="text-gray-250 font-medium">{m}</span>
                   <button onClick={() => removeMember(m)} className="text-gray-500 hover:text-red-400 ml-1 transition">
                     &times;
@@ -145,7 +185,7 @@ export default function BillSplitter() {
                   value={desc}
                   onChange={(e) => setDesc(e.target.value)}
                   placeholder="e.g. Dinner, Uber, AirBnb..."
-                  className="w-full bg-slate-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-white placeholder-gray-500"
+                  className="w-full bg-slate-955 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-white placeholder-gray-500"
                 />
               </div>
 
@@ -157,7 +197,7 @@ export default function BillSplitter() {
                     value={amt}
                     onChange={(e) => setAmt(e.target.value)}
                     placeholder="0.00"
-                    className="w-full bg-slate-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-white placeholder-gray-500"
+                    className="w-full bg-slate-955 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-white placeholder-gray-500"
                   />
                 </div>
                 <div>
@@ -165,7 +205,7 @@ export default function BillSplitter() {
                   <select 
                     value={payer}
                     onChange={(e) => setPayer(e.target.value)}
-                    className="w-full bg-slate-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-white"
+                    className="w-full bg-slate-955 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-indigo-500 text-white"
                   >
                     {members.map(m => (
                       <option key={m} value={m}>{m}</option>
@@ -212,7 +252,7 @@ export default function BillSplitter() {
               {expenses.map(exp => (
                 <div key={exp.id} className="flex justify-between items-center bg-slate-950/60 p-4 rounded-xl border border-gray-855 text-sm">
                   <div>
-                    <div className="font-semibold text-gray-200">{exp.description}</div>
+                    <div className="font-semibold text-gray-205">{exp.description}</div>
                     <div className="text-xs text-gray-500 mt-1">
                       Paid by <span className="text-indigo-400 font-medium">{exp.paidBy}</span> &middot; Split among {exp.splitAmong.join(', ')}
                     </div>
@@ -260,7 +300,7 @@ export default function BillSplitter() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 text-gray-500 text-sm">
+              <div className="text-center py-12 text-gray-550 text-sm">
                 No debts to settle! All balances are balanced.
               </div>
             )}
